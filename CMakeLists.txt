@@ -228,6 +228,12 @@ endif ()
 option(SS4S_MODULE_BUILD_DUMMY "Enable SS4S dummy module" OFF)
 
 add_subdirectory(third_party/ss4s)
+# Own variant: smp_resource_webos5.c needs the SDL_webOS* declarations whichever SDL.h it gets
+# (see src/app/platform/webos/sdl_webos_exported.h); without this the build fails by build order.
+if (TARGET ss4s-module-smp-webos)
+    target_compile_options(ss4s-module-smp-webos PRIVATE
+            -include "${CMAKE_SOURCE_DIR}/src/app/platform/webos/sdl_webos_exported.h")
+endif ()
 add_subdirectory(third_party/lvgl EXCLUDE_FROM_ALL)
 target_include_directories(lvgl PUBLIC ${CMAKE_SOURCE_DIR}/third_party/lvgl/src)
 target_include_directories(lvgl PRIVATE ${CMAKE_SOURCE_DIR}/src/app/util)
