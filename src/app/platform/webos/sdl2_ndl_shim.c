@@ -102,6 +102,12 @@ static char last_window_id[64];
 static int last_video_w;
 static int last_video_h;
 
+/* Own variant (aurora_shim_set_video_area): the last source and full-screen destination the
+ * video module set itself, so the picture can be shrunk inside it and put back exactly. */
+static ShimRect last_src;
+static ShimRect last_full_dst;
+static int in_area_call;
+
 int SDL_webOSSetExportedWindow(const char *window_id, ShimRect *src, ShimRect *dst);
 
 static int set_exported_raw(const char *window_id, ShimRect *src, ShimRect *dst) {
@@ -163,6 +169,14 @@ int SDL_webOSSetExportedWindow(const char *window_id, ShimRect *src, ShimRect *d
         strncpy(last_window_id, window_id, sizeof(last_window_id) - 1);
         last_window_id[sizeof(last_window_id) - 1] = '\0';
     }
+    if (!in_area_call) {
+        if (src != NULL && src->w > 0 && src->h > 0) {
+            last_src = *src;
+        }
+        if (dst != NULL && dst->w > 0 && dst->h > 0) {
+            last_full_dst = *dst;
+        }
+    }
     /* A 0-size source is what the compositor logged as sourceInput 0x0,
      * which samples no video and leaves the panel black. */
     if (src == NULL || src->w <= 0 || src->h <= 0) {
@@ -205,6 +219,48 @@ void aurora_ndl_apply_video_rect(int width, int height) {
         return;
     }
     SDL_webOSSetExportedWindow(last_window_id, NULL, NULL);
+}
+
+/* Own variant: put the video plane in part of the screen, in thousandths (permille) of the
+ * full-screen area the video module last set; w or h <= 0 puts it back full screen. Used for
+ * the soft keyboard on modules with UI compositing (smp-webos), whose SetDisplayArea is a no-op.
+ * Found by the app through dlsym, like aurora_ndl_apply_video_rect. Returns non-zero on success. */
+int aurora_shim_set_video_area(int x_pm, int y_pm, int w_pm, int h_pm) {
+    ShimRect full;
+    ShimRect dst;
+    ShimRect *src = (last_src.w > 0 && last_src.h > 0) ? &last_src : NULL;
+    int ok;
+    if (last_window_id[0] == '\0') {
+        return 0;
+    }
+    if (last_full_dst.w > 0 && last_full_dst.h > 0) {
+        full = last_full_dst;
+    } else {
+        void *window = SDL_GL_GetCurrentWindow();
+        full.x = 0;
+        full.y = 0;
+        full.w = 0;
+        full.h = 0;
+        if (window != NULL) {
+            SDL_GetWindowSize(window, &full.w, &full.h);
+        }
+        if (full.w <= 0 || full.h <= 0) {
+            full.w = 1920;
+            full.h = 1080;
+        }
+    }
+    if (w_pm <= 0 || h_pm <= 0) {
+        dst = full;
+    } else {
+        dst.x = full.x + full.w * x_pm / 1000;
+        dst.y = full.y + full.h * y_pm / 1000;
+        dst.w = full.w * w_pm / 1000;
+        dst.h = full.h * h_pm / 1000;
+    }
+    in_area_call = 1;
+    ok = SDL_webOSSetExportedWindow(last_window_id, src, &dst);
+    in_area_call = 0;
+    return ok;
 }
 
 int SDL_webOSExportedSetProperty(const char *window_id, const char *name, const char *value) {

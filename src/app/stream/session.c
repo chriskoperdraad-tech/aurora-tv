@@ -20,6 +20,7 @@
 
 #if TARGET_WEBOS
 #include "platform/webos/game_mode.h"
+#include <dlfcn.h>
 #endif
 
 // Expected luminance values in SEI are in units of 0.0001 cd/m2
@@ -205,6 +206,34 @@ void streaming_enter_overlay(session_t *session, int x, int y, int w, int h) {
     if ((session->video_cap.transform & SS4S_VIDEO_CAP_TRANSFORM_UI_COMPOSITING) == 0) {
         SS4S_PlayerVideoSetDisplayArea(session->player, NULL, &dst);
     }
+}
+
+bool streaming_set_composited_video_area(session_t *session, int x_pm, int y_pm, int w_pm, int h_pm) {
+#if TARGET_WEBOS
+    if (session == NULL || !session->player ||
+        (session->video_cap.transform & SS4S_VIDEO_CAP_TRANSFORM_UI_COMPOSITING) == 0) {
+        return false;
+    }
+    /* sdl2_ndl_shim.c, which holds the SONAME libSDL2-2.0.so.0 (as ndl_player.c finds it). */
+    void *shim = dlopen("libSDL2-2.0.so.0", RTLD_LAZY | RTLD_NOLOAD);
+    if (shim == NULL) {
+        commons_log_warn("Session", "Video area: SDL shim not loaded");
+        return false;
+    }
+    int (*set_area)(int, int, int, int) = (int (*)(int, int, int, int)) dlsym(shim, "aurora_shim_set_video_area");
+    bool ok = set_area != NULL && set_area(x_pm, y_pm, w_pm, h_pm) != 0;
+    commons_log_info("Session", "Video area %d,%d %dx%d (permille): %s", x_pm, y_pm, w_pm, h_pm,
+                     ok ? "set" : (set_area == NULL ? "no shim function" : "failed"));
+    dlclose(shim);
+    return ok;
+#else
+    (void) session;
+    (void) x_pm;
+    (void) y_pm;
+    (void) w_pm;
+    (void) h_pm;
+    return false;
+#endif
 }
 
 void streaming_set_hdr(session_t *session, bool hdr) {

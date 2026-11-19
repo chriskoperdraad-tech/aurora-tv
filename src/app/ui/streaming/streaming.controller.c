@@ -695,7 +695,11 @@ static void soft_keyboard_place_video(streaming_controller_t *controller) {
     lv_disp_t *disp = lv_disp_get_default();
     int hor = lv_disp_get_hor_res(disp), ver = lv_disp_get_ver_res(disp);
     int w = hor * SOFT_KBD_VIDEO_PCT / 100, h = ver * SOFT_KBD_VIDEO_PCT / 100;
+    /* Modules that place the picture themselves (NDL): */
     streaming_enter_overlay(session, (hor - w) / 2, 0, w, h);
+    /* Modules with UI compositing (smp-webos, the G5), where the call above does nothing: */
+    streaming_set_composited_video_area(session, (1000 - SOFT_KBD_VIDEO_PCT * 10) / 2, 0,
+                                        SOFT_KBD_VIDEO_PCT * 10, SOFT_KBD_VIDEO_PCT * 10);
 }
 
 static void soft_keyboard_restore_video(streaming_controller_t *controller) {
@@ -704,6 +708,7 @@ static void soft_keyboard_restore_video(streaming_controller_t *controller) {
         return;
     }
     streaming_enter_fullscreen(session);
+    streaming_set_composited_video_area(session, 0, 0, 0, 0);
 }
 
 static void open_keyboard(lv_event_t *event) {

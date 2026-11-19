@@ -121,6 +121,13 @@ void streaming_enter_fullscreen(session_t *session);
 
 void streaming_enter_overlay(session_t *session, int x, int y, int w, int h);
 
+/**
+ * Own variant: on video modules with UI compositing (smp-webos), where streaming_enter_overlay does
+ * nothing, place the picture through the app's SDL shim, in thousandths of the screen. w or h <= 0
+ * puts it back full screen. Does nothing on other modules. Returns true if the picture was placed.
+ */
+bool streaming_set_composited_video_area(session_t *session, int x_pm, int y_pm, int w_pm, int h_pm);
+
 void streaming_set_hdr(session_t *session, bool hdr);
 
 void streaming_error(session_t *session, int code, const char *fmt, ...);
