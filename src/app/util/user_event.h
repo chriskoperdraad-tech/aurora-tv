@@ -19,6 +19,9 @@
 #define USER_TOGGLE_STATS_PIN 534
 #define USER_TOGGLE_VMOUSE 535
 #define USER_APP_FOREGROUND 536
+/* Own variant: remote app keys (platform/webos/remote_appkeys.c). */
+#define USER_TOGGLE_SOFT_KEYBOARD 537
+#define USER_REMOTE_WIN_KEY 538
 
 
 extern unsigned int app_userevent_remotebutton;

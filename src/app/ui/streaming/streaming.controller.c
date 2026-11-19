@@ -12,6 +12,8 @@
 
 #include "util/bus.h"
 #include "stream/session.h"
+#include "stream/input/session_input.h"
+#include "stream/input/vk.h"
 #include "util/user_event.h"
 #include "util/i18n.h"
 #include "logging.h"
@@ -482,6 +484,19 @@ static bool on_event(lv_fragment_t *self, int code, void *userdata) {
             }
             return true;
         }
+        case USER_REMOTE_WIN_KEY: {
+            /* Own variant: Rakuten TV on the remote sends the Windows key (press and release). */
+            if (controller->global->session != NULL) {
+                stream_input_t *input = session_get_input(controller->global->session);
+                const ui_userevent_t *event = userdata;
+                if (input != NULL && input->started && !input->view_only && event != NULL) {
+                    bool down = (intptr_t) event->data1 != 0;
+                    /* Like the soft keyboard's Win key (keyboard_input_send_modifier): no modifier flags. */
+                    stream_input_send_key_event(input, VK_LWIN, down, 0);
+                }
+            }
+            return true;
+        }
         case USER_TOGGLE_STATS_PIN: {
             streaming_toggle_stats_pin();
             return true;
@@ -490,6 +505,18 @@ static bool on_event(lv_fragment_t *self, int code, void *userdata) {
             if (controller->global->session) {
                 session_toggle_vmouse(controller->global->session);
             }
+            return true;
+        }
+        case USER_TOGGLE_SOFT_KEYBOARD: {
+            /* Own variant: LG Channels on the remote (platform/webos/remote_appkeys.c). */
+            if (streaming_soft_keyboard_shown()) {
+                soft_keyboard_close_cb(controller);
+                return true;
+            }
+            if (controller->global->session == NULL || session_get_input(controller->global->session)->view_only) {
+                return true;
+            }
+            bus_pushevent(USER_OPEN_SOFT_KEYBOARD, NULL, NULL);
             return true;
         }
         case USER_OPEN_SOFT_KEYBOARD: {

@@ -14,6 +14,7 @@
 
 #if TARGET_WEBOS
 #include "platform/webos/keyboard_evdev.h"
+#include "platform/webos/remote_appkeys.h"
 #endif
 
 typedef struct app_input_t app_input_t;
@@ -62,6 +63,7 @@ typedef struct stream_input_t {
 #endif
 #if TARGET_WEBOS
     struct keyboard_evdev_t *keyboard_evdev;
+    struct remote_appkeys_t *remote_appkeys;
 #endif
 } stream_input_t;
 

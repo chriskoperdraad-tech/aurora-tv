@@ -73,6 +73,7 @@ void session_input_init(stream_input_t *input, session_t *session, app_input_t *
     input->touchpad_count = 0;
 #if TARGET_WEBOS
     input->keyboard_evdev = NULL;
+    input->remote_appkeys = NULL;
 #endif
 #if FEATURE_INPUT_EVMOUSE
     if (!config->view_only && config->hardware_mouse) {
@@ -85,6 +86,8 @@ void session_input_init(stream_input_t *input, session_t *session, app_input_t *
         if (input->keyboard_evdev != NULL) {
             commons_log_info("Input", "USB keyboard EVIOCGRAB active for stream");
         }
+        /* Own variant: LG Channels = keyboard, Rakuten TV = Win, only while streaming. */
+        input->remote_appkeys = remote_appkeys_start();
     }
 #endif
 }
@@ -94,6 +97,8 @@ void session_input_deinit(stream_input_t *input) {
 #if TARGET_WEBOS
     keyboard_evdev_stop(input->keyboard_evdev);
     input->keyboard_evdev = NULL;
+    remote_appkeys_stop(input->remote_appkeys);
+    input->remote_appkeys = NULL;
 #endif
 #if FEATURE_INPUT_EVMOUSE
     const session_config_t *config = &input->session->config;

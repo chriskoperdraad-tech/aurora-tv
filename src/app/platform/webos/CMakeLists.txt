@@ -8,6 +8,7 @@ target_sources(moonlight-lib PRIVATE
         steam_ble.c
         dualsense_usb.c
         keyboard_evdev.c
+        remote_appkeys.c
         sdl_webos_sdl3.c)
 
 # Occupies SONAME libSDL2-2.0.so.0 so NDL does not bind the TV's SDL 2.0.14.
