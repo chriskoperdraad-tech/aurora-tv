@@ -565,7 +565,7 @@ lv_obj_t *soft_keyboard_create(lv_obj_t *parent, session_t *session,
     lv_obj_t *kbd_content = lv_obj_create(cont);
     lv_obj_remove_style_all(kbd_content);
     lv_obj_set_width(kbd_content, LV_PCT(100));
-    lv_obj_set_height(kbd_content, lv_pct(40));
+    lv_obj_set_height(kbd_content, lv_pct(SOFT_KBD_HEIGHT_PCT));
     lv_obj_set_style_bg_color(kbd_content, lv_color_hex(KBD_PANEL_BG), 0);
     lv_obj_set_style_bg_opa(kbd_content, LV_OPA_90, 0);
     lv_obj_set_style_pad_hor(kbd_content, LV_DPX(10), 0);

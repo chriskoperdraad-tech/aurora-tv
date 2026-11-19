@@ -683,9 +683,9 @@ static void soft_keyboard_close_cb(void *userdata) {
     soft_keyboard_restore_video(controller);
 }
 
-/* Own variant: the soft keyboard takes the bottom 40% of the screen (soft_keyboard.c), so the
- * picture goes above it, scaled to the top 60% and centred, instead of under the keyboard. */
-#define SOFT_KBD_VIDEO_PCT 60
+/* Own variant: the soft keyboard takes the bottom SOFT_KBD_HEIGHT_PCT of the screen (soft_keyboard.h),
+ * so the picture goes above it, scaled to the rest and centred, instead of under the keyboard. */
+#define SOFT_KBD_VIDEO_PCT (100 - SOFT_KBD_HEIGHT_PCT)
 
 static void soft_keyboard_place_video(streaming_controller_t *controller) {
     session_t *session = controller->global->session;

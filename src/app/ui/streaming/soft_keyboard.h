@@ -6,6 +6,10 @@
 typedef struct stream_input_t stream_input_t;
 typedef struct session_t session_t;
 
+/* Own variant: the keyboard panel's share of the screen height. The picture goes in the rest,
+ * above it (streaming.controller.c, soft_keyboard_place_video). Was 40 in Aurora. */
+#define SOFT_KBD_HEIGHT_PCT 30
+
 typedef enum {
     SOFT_KBD_GP_TOGGLE_LAYER = 1,
     SOFT_KBD_GP_ARROW_LEFT,
