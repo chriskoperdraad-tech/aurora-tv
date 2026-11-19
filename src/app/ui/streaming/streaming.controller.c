@@ -39,6 +39,10 @@ static void on_cancel_key(lv_event_t *event);
 
 static void soft_keyboard_close_cb(void *userdata);
 
+static void soft_keyboard_place_video(streaming_controller_t *controller);
+
+static void soft_keyboard_restore_video(streaming_controller_t *controller);
+
 static bool show_overlay(streaming_controller_t *controller);
 
 static void on_view_created(lv_fragment_t *self, lv_obj_t *view);
@@ -535,6 +539,7 @@ static bool on_event(lv_fragment_t *self, int code, void *userdata) {
                 app_input_set_group(&controller->global->ui.input, kbd_group);
             }
             app_set_mouse_grab(&controller->global->input, false);
+            soft_keyboard_place_video(controller);
             return true;
         }
         case USER_SIZE_CHANGED: {
@@ -675,6 +680,30 @@ static void soft_keyboard_close_cb(void *userdata) {
         session_screen_keyboard_closed(controller->global->session);
     }
     lv_obj_del(kbd_obj);
+    soft_keyboard_restore_video(controller);
+}
+
+/* Own variant: the soft keyboard takes the bottom 40% of the screen (soft_keyboard.c), so the
+ * picture goes above it, scaled to the top 60% and centred, instead of under the keyboard. */
+#define SOFT_KBD_VIDEO_PCT 60
+
+static void soft_keyboard_place_video(streaming_controller_t *controller) {
+    session_t *session = controller->global->session;
+    if (session == NULL) {
+        return;
+    }
+    lv_disp_t *disp = lv_disp_get_default();
+    int hor = lv_disp_get_hor_res(disp), ver = lv_disp_get_ver_res(disp);
+    int w = hor * SOFT_KBD_VIDEO_PCT / 100, h = ver * SOFT_KBD_VIDEO_PCT / 100;
+    streaming_enter_overlay(session, (hor - w) / 2, 0, w, h);
+}
+
+static void soft_keyboard_restore_video(streaming_controller_t *controller) {
+    session_t *session = controller->global->session;
+    if (session == NULL || streaming_overlay_shown()) {
+        return;
+    }
+    streaming_enter_fullscreen(session);
 }
 
 static void open_keyboard(lv_event_t *event) {
@@ -695,6 +724,7 @@ static void open_keyboard(lv_event_t *event) {
     }
     /* Mostrar cursor e liberar mouse para Magic Remote / ponteiro funcionarem */
     app_set_mouse_grab(&controller->global->input, false);
+    soft_keyboard_place_video(controller);
 }
 
 static void toggle_vmouse(lv_event_t *event) {

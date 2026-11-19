@@ -544,7 +544,9 @@ lv_obj_t *soft_keyboard_create(lv_obj_t *parent, session_t *session,
     lv_obj_remove_style_all(cont);
     lv_obj_set_size(cont, LV_PCT(100), LV_PCT(100));
     lv_obj_set_style_bg_color(cont, lv_color_black(), 0);
-    lv_obj_set_style_bg_opa(cont, LV_OPA_40, 0);
+    /* Own variant: no dim over the whole screen; the picture now sits above the keyboard
+     * (streaming.controller.c, soft_keyboard_place_video) and should stay bright. */
+    lv_obj_set_style_bg_opa(cont, LV_OPA_TRANSP, 0);
 
     soft_kbd_t *kbd = malloc(sizeof(soft_kbd_t));
     if (!kbd) {
