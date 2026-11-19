@@ -100,8 +100,10 @@ if (TARGET_WEBOS)
     set(CMAKE_THREAD_LIBS_INIT "-lpthread" CACHE INTERNAL "webOS pthread")
     set(OS_LINUX TRUE)
 
-    set(WEBOS_APPINFO_ID "com.aurora.gamestream" CACHE STRING "webOS app id (override for a side-by-side test build, e.g. com.aurora.gamestream.dev)")
-    set(WEBOS_APPINFO_TITLE "Aurora" CACHE STRING "webOS app title/label shown on the Home screen")
+    # Own variant: its own id so it installs beside the official Aurora, with its own conf/ (and pairing).
+    # Keep the com.aurora. prefix: stream_priority.c closes running apps except com.aurora.*.
+    set(WEBOS_APPINFO_ID "com.aurora.gamestream.eigen" CACHE STRING "webOS app id (override for a side-by-side test build, e.g. com.aurora.gamestream.dev)")
+    set(WEBOS_APPINFO_TITLE "Aurora Eigen" CACHE STRING "webOS app title/label shown on the Home screen")
     set(CMAKE_INSTALL_RPATH "$ORIGIN/lib/backports:$ORIGIN/../lib/backports:$ORIGIN")
 elseif (TARGET_STEAMLINK)
     set(OS_LINUX TRUE)
