@@ -57,6 +57,8 @@ typedef struct {
 
 static soft_kbd_t *g_active_kbd = NULL;
 
+static void kbd_apply_layer_font(soft_kbd_t *kbd);
+
 /* Artemis-style d-pad cluster (no spacer row):
  *   …  Home  ^  End
  *   …   <    v   >
