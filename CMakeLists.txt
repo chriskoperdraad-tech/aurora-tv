@@ -233,6 +233,17 @@ add_subdirectory(third_party/ss4s)
 if (TARGET ss4s-module-smp-webos)
     target_compile_options(ss4s-module-smp-webos PRIVATE
             -include "${CMAKE_SOURCE_DIR}/src/app/platform/webos/sdl_webos_exported.h")
+    # Linking has the same race: -lSDL2 finds sdl2-compat's libSDL2.so (no SDL_webOS*) once it is
+    # installed. Builds that passed linked the sysroot's webOS SDL2 (NEEDED libSDL2-2.0.so.0, which
+    # the app's sdl2_ndl_shim provides at run time), so link that one explicitly.
+    if (CMAKE_SYSROOT)
+        find_library(WEBOS_SYSROOT_SDL2 NAMES SDL2 PATHS "${CMAKE_SYSROOT}/usr/lib"
+                NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+        message(STATUS "ss4s-module-smp-webos: webOS SDL2 from sysroot: ${WEBOS_SYSROOT_SDL2}")
+        if (WEBOS_SYSROOT_SDL2)
+            target_link_libraries(ss4s-module-smp-webos PRIVATE "${WEBOS_SYSROOT_SDL2}")
+        endif ()
+    endif ()
 endif ()
 add_subdirectory(third_party/lvgl EXCLUDE_FROM_ALL)
 target_include_directories(lvgl PUBLIC ${CMAKE_SOURCE_DIR}/third_party/lvgl/src)
