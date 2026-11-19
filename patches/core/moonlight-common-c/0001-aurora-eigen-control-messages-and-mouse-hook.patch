@@ -39,11 +39,37 @@ index 715c0cc..28f5105 100644
 +    return sendMessageAndForget((short)type, (short)length, payload, CTRL_CHANNEL_GENERIC,
 +                                ENET_PACKET_FLAG_RELIABLE, false) ? 0 : -1;
 +}
+diff --git a/src/InputStream.c b/src/InputStream.c
+index 99af36b..69254ff 100644
+--- a/src/InputStream.c
++++ b/src/InputStream.c
+@@ -849,10 +849,21 @@ int LiSendMouseMoveAsMousePositionEvent(short deltaX, short deltaY, short refere
+ }
+ 
+ // Send a mouse button event to the streaming machine
++// Aurora Eigen: see Limelight.h.
++static ConnListenerMouseButtonHook mouseButtonHook;
++
++void LiSetMouseButtonHook(ConnListenerMouseButtonHook hook) {
++    mouseButtonHook = hook;
++}
++
+ int LiSendMouseButtonEvent(char action, int button) {
+     PPACKET_HOLDER holder;
+     int err;
+ 
++    if (mouseButtonHook != NULL) {
++        mouseButtonHook(action, button);
++    }
++
+     if (!initialized) {
+         return -2;
+     }
 diff --git a/src/Limelight.h b/src/Limelight.h
-index 0ef42b9..c314ed6 100644
+index 0ef42b9..986578c 100644
 --- a/src/Limelight.h
 +++ b/src/Limelight.h
-@@ -1029,6 +1029,16 @@ typedef struct _SS_HDR_METADATA {
+@@ -1029,6 +1029,21 @@ typedef struct _SS_HDR_METADATA {
  // function when HDR mode is active on the host. This is a Sunshine protocol extension.
  bool LiGetHdrMetadata(PSS_HDR_METADATA metadata);
  
@@ -56,6 +82,11 @@ index 0ef42b9..c314ed6 100644
 +// Aurora Eigen: sends one message on the (encrypted) control stream, reliably, on the generic
 +// channel. Returns 0 on success, -1 if sending failed and -2 if there is no ENet control stream.
 +int LiSendControlStreamMessage(unsigned short type, const void* payload, unsigned short length);
++
++// Aurora Eigen: called at the start of every LiSendMouseButtonEvent, on the caller's thread,
++// before the event is sent (the soft keyboard uses left presses to ask again for text fields).
++typedef void(*ConnListenerMouseButtonHook)(char action, int button);
++void LiSetMouseButtonHook(ConnListenerMouseButtonHook hook);
 +
  // This function requests an IDR frame from the host. Typically this is done using DR_NEED_IDR, but clients
  // processing frames asynchronously may need to reset their decoder state even after returning DR_OK for

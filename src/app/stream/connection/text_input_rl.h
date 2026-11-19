@@ -5,8 +5,11 @@
  * "Text input", host setting keyboard_follows_focus, on by default).
  *
  * Once the stream has started the client asks for notices; the host then sends one when a text
- * field gains focus (raise), loses it (lower) or changes (update), numbered by a serial. Raise
- * opens the soft keyboard and lower closes it (USER_OPEN_SOFT_KEYBOARD / USER_CLOSE_SOFT_KEYBOARD).
+ * field gains focus (raise), loses it (lower) or changes (update), numbered by a serial. Raise and
+ * update open the soft keyboard, lower closes it (USER_OPEN_SOFT_KEYBOARD / USER_CLOSE_SOFT_KEYBOARD).
+ * The host only sends on a change, so a left click on the stream asks again 250 ms later; a request
+ * makes the host raise at once if a text field has the focus (same field clicked after the keyboard
+ * was closed by hand). Clicks are seen through LiSetMouseButtonHook (patches/core/moonlight-common-c).
  * Wire format: Rubylight client/protocol/core/src/text_input.rs. Hosts without the extension
  * never send a notice, so nothing changes there.
  */
