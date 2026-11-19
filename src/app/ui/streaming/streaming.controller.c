@@ -488,6 +488,13 @@ static bool on_event(lv_fragment_t *self, int code, void *userdata) {
             }
             return true;
         }
+        case USER_REMOTE_DISCONNECT: {
+            /* Own variant: LG Channels on the remote, the same as the overlay's Disconnect button. */
+            if (controller->global->session != NULL) {
+                session_interrupt(controller->global->session, false, STREAMING_INTERRUPT_USER);
+            }
+            return true;
+        }
         case USER_REMOTE_WIN_KEY: {
             /* Own variant: Rakuten TV on the remote sends the Windows key (press and release). */
             if (controller->global->session != NULL) {

@@ -82,8 +82,8 @@ static void handle_event(const struct input_event *ev) {
     switch (ev->code) {
         case REMOTE_KEY_LGCHANNELS:
             if (down) {
-                commons_log_info("Input", "Remote app keys: LG Channels -> toggle keyboard");
-                bus_pushevent(USER_TOGGLE_SOFT_KEYBOARD, NULL, NULL);
+                commons_log_info("Input", "Remote app keys: LG Channels -> disconnect");
+                bus_pushevent(USER_REMOTE_DISCONNECT, NULL, NULL);
             }
             break;
         case REMOTE_KEY_RAKUTENTV:

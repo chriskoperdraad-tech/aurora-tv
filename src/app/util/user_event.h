@@ -22,6 +22,7 @@
 /* Own variant: remote app keys (platform/webos/remote_appkeys.c). */
 #define USER_TOGGLE_SOFT_KEYBOARD 537
 #define USER_REMOTE_WIN_KEY 538
+#define USER_REMOTE_DISCONNECT 539
 
 
 extern unsigned int app_userevent_remotebutton;

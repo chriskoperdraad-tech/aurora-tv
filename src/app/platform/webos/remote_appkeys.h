@@ -4,7 +4,8 @@
  * Remote app keys on webOS (own variant): read the LG remote's evdev nodes during a
  * stream and act on two streaming-service buttons.
  *
- * - LG Channels (evdev 1043): toggle the on-screen keyboard (USER_TOGGLE_SOFT_KEYBOARD).
+ * - LG Channels (evdev 1043): disconnect, like the overlay's Disconnect (USER_REMOTE_DISCONNECT).
+ *   The keyboard comes up by itself on the host's text fields (text_input_rl.c).
  * - Rakuten TV  (evdev 1044): Windows key to the host (USER_REMOTE_WIN_KEY, data1 = down).
  *
  * These keys never reach the app through SDL: the compositor's key filter (LG's, or
