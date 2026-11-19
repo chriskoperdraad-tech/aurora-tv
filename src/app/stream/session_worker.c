@@ -8,6 +8,7 @@
 #include "util/i18n.h"
 #include "input/input_gamepad.h"
 #include "stream/connection/session_connection.h"
+#include "stream/connection/text_input_rl.h"
 #include "stream/audio/session_audio.h"
 #include "stream/video/session_video.h"
 #include "stream/adaptive_bitrate.h"
@@ -217,6 +218,7 @@ int session_worker(session_t *session) {
     bus_pushevent(USER_STREAM_CLOSE, NULL, NULL);
 
     session_set_state(session, STREAMING_DISCONNECTING);
+    text_input_rl_stop();
     LiStopConnection();
 
     if (session->quitapp) {

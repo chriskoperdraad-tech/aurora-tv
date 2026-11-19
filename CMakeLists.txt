@@ -191,6 +191,32 @@ else ()
 endif ()
 
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_CORE_LIBS})
+
+# Own variant: our changes to submodules live as patches in patches/<submodule path>/ and are
+# applied here, so the submodules keep pointing at the upstream forks. Already applied: skipped.
+find_package(Git REQUIRED)
+function(eigen_apply_submodule_patches submodule)
+    file(GLOB patches "${CMAKE_SOURCE_DIR}/patches/${submodule}/*.patch")
+    list(SORT patches)
+    foreach (patch ${patches})
+        execute_process(COMMAND "${GIT_EXECUTABLE}" apply --reverse --check "${patch}"
+                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/${submodule}"
+                RESULT_VARIABLE already OUTPUT_QUIET ERROR_QUIET)
+        if (already EQUAL 0)
+            message(STATUS "Patch already applied to ${submodule}: ${patch}")
+            continue()
+        endif ()
+        execute_process(COMMAND "${GIT_EXECUTABLE}" apply --whitespace=nowarn "${patch}"
+                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/${submodule}"
+                RESULT_VARIABLE rc)
+        if (NOT rc EQUAL 0)
+            message(FATAL_ERROR "Patch does not apply to ${submodule}: ${patch}")
+        endif ()
+        message(STATUS "Patch applied to ${submodule}: ${patch}")
+    endforeach ()
+endfunction()
+eigen_apply_submodule_patches(core/moonlight-common-c)
+
 add_subdirectory(core/moonlight-common-c)
 
 # moonlight-common-c selects its monotonic clock with #ifdef HAVE_CLOCK_GETTIME, but its own

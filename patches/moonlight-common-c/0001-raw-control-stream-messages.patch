@@ -1,0 +1,62 @@
+diff --git a/src/ControlStream.c b/src/ControlStream.c
+index 715c0cc..28f5105 100644
+--- a/src/ControlStream.c
++++ b/src/ControlStream.c
+@@ -109,6 +109,7 @@ static PLT_THREAD asyncCallbackThread;
+ static uint32_t lastGoodFrame;
+ static uint32_t lastSeenFrame;
+ static bool stopping;
++static ConnListenerUnknownControlMessage unknownControlMessageCallback;
+ static bool disconnectPending;
+ static bool encryptedControlStream;
+ static bool hdrEnabled;
+@@ -1406,6 +1407,11 @@ static void controlReceiveThreadFunc(void* context) {
+                 free(ctlHdr);
+                 return;
+             }
++            else if (unknownControlMessageCallback != NULL && packetLength >= (int)sizeof(*ctlHdr)) {
++                // Aurora Eigen: hand host extension messages (Rubylight's 0x55xx) to the client.
++                unknownControlMessageCallback(ctlHdr->type, (const unsigned char*)ctlHdr + sizeof(*ctlHdr),
++                                              packetLength - (int)sizeof(*ctlHdr));
++            }
+ 
+             free(ctlHdr);
+         }
+@@ -2116,3 +2122,16 @@ bool LiGetHdrMetadata(PSS_HDR_METADATA metadata) {
+     *metadata = hdrMetadata;
+     return true;
+ }
++
++// Aurora Eigen: see Limelight.h.
++void LiSetUnknownControlMessageCallback(ConnListenerUnknownControlMessage callback) {
++    unknownControlMessageCallback = callback;
++}
++
++int LiSendControlStreamMessage(unsigned short type, const void* payload, unsigned short length) {
++    if (peer == NULL || stopping) {
++        return -2;
++    }
++    return sendMessageAndForget((short)type, (short)length, payload, CTRL_CHANNEL_GENERIC,
++                                ENET_PACKET_FLAG_RELIABLE, false) ? 0 : -1;
++}
+diff --git a/src/Limelight.h b/src/Limelight.h
+index 0ef42b9..c314ed6 100644
+--- a/src/Limelight.h
++++ b/src/Limelight.h
+@@ -1029,6 +1029,16 @@ typedef struct _SS_HDR_METADATA {
+ // function when HDR mode is active on the host. This is a Sunshine protocol extension.
+ bool LiGetHdrMetadata(PSS_HDR_METADATA metadata);
+ 
++// Aurora Eigen: raw control stream messages, for host extensions such as Rubylight's
++// (0x553B text input). The callback gets every message type this library does not handle
++// itself, on the control stream's receive thread; payload excludes the type header.
++typedef void(*ConnListenerUnknownControlMessage)(unsigned short type, const unsigned char* payload, int length);
++void LiSetUnknownControlMessageCallback(ConnListenerUnknownControlMessage callback);
++
++// Aurora Eigen: sends one message on the (encrypted) control stream, reliably, on the generic
++// channel. Returns 0 on success, -1 if sending failed and -2 if there is no ENet control stream.
++int LiSendControlStreamMessage(unsigned short type, const void* payload, unsigned short length);
++
+ // This function requests an IDR frame from the host. Typically this is done using DR_NEED_IDR, but clients
+ // processing frames asynchronously may need to reset their decoder state even after returning DR_OK for
+ // the prior frame. Rather than wait for a new frame and return DR_NEED_IDR for that one, they can just

@@ -7,10 +7,17 @@
 #include "input/input_gamepad.h"
 #include "app.h"
 #include "stream/session_priv.h"
+#include "text_input_rl.h"
 
 static session_t *current_session = NULL;
 
+/* Own variant: the control stream is up; ask the host to report its text fields. */
+static void connection_started(void) {
+    text_input_rl_start();
+}
+
 static void connection_terminated(int errorCode) {
+    text_input_rl_stop();
     if (!current_session) {
         return;
     }
@@ -120,7 +127,7 @@ CONNECTION_LISTENER_CALLBACKS connection_callbacks = {
         .stageStarting = NULL,
         .stageComplete = NULL,
         .stageFailed = connection_stage_failed,
-        .connectionStarted = NULL,
+        .connectionStarted = connection_started,
         .connectionTerminated = connection_terminated,
         .logMessage = connection_log_message,
         .rumble = connection_rumble,
