@@ -518,18 +518,6 @@ static bool on_event(lv_fragment_t *self, int code, void *userdata) {
             }
             return true;
         }
-        case USER_TOGGLE_SOFT_KEYBOARD: {
-            /* Own variant: LG Channels on the remote (platform/webos/remote_appkeys.c). */
-            if (streaming_soft_keyboard_shown()) {
-                soft_keyboard_close_cb(controller);
-                return true;
-            }
-            if (controller->global->session == NULL || session_get_input(controller->global->session)->view_only) {
-                return true;
-            }
-            bus_pushevent(USER_OPEN_SOFT_KEYBOARD, NULL, NULL);
-            return true;
-        }
         case USER_OPEN_SOFT_KEYBOARD: {
             if (controller->soft_kbd) {
                 return true;

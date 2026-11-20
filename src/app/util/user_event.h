@@ -19,8 +19,8 @@
 #define USER_TOGGLE_STATS_PIN 534
 #define USER_TOGGLE_VMOUSE 535
 #define USER_APP_FOREGROUND 536
-/* Own variant: remote app keys (platform/webos/remote_appkeys.c). */
-#define USER_TOGGLE_SOFT_KEYBOARD 537
+/* Own variant: remote app keys (platform/webos/remote_appkeys.c). 537 was a keyboard toggle, no
+ * longer used. */
 #define USER_REMOTE_WIN_KEY 538
 #define USER_REMOTE_DISCONNECT 539
 

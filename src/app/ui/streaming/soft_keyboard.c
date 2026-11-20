@@ -59,14 +59,13 @@ static soft_kbd_t *g_active_kbd = NULL;
 
 static void kbd_apply_layer_font(soft_kbd_t *kbd);
 
-/* Artemis-style d-pad cluster (no spacer row):
+/* Artemis-style d-pad cluster on the &123 pages (no spacer row); left and right are
+ * KBD_LEFT_LB and KBD_RIGHT_RB below:
  *   …  Home  ^  End
  *   …   <    v   >
  */
-#define KBD_ARROW_LEFT  "<\nLB"
 #define KBD_ARROW_DOWN  "v"
 #define KBD_ARROW_UP    "^"
-#define KBD_ARROW_RIGHT ">\nRB"
 
 /* --- Alphabetic, own variant: 4 rows on a 24-unit grid. Letters are 2 units wide and centred in
  * every row, with side keys of the same width on both ends; each row starts half a key further in

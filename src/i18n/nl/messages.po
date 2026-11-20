@@ -522,21 +522,21 @@ msgstr "Niet nu"
 msgid "Some settings require a restart to take effect."
 msgstr "Sommige instellingen vereisen dat u het programma opnieuw opstart."
 
-#: src/app/ui/streaming/hints.c:9
-msgid "Long press BACK (or press EXIT for traditional TV remote) while streaming, to open status overlay."
-msgstr ""
-
 #: src/app/ui/streaming/hints.c:10
-msgid "Frequent lagging on 5GHz Wi-Fi? Try changing to another channel, check Help for details."
-msgstr ""
+msgid "Long press BACK (or press EXIT for traditional TV remote) while streaming, to open status overlay."
+msgstr "Houd tijdens het streamen TERUG lang ingedrukt (of druk op EXIT op een gewone afstandsbediening) om het menu te openen."
 
-#: src/app/ui/streaming/hints.c:11
-msgid "Xbox One/Series controller can't be directly connected via cable or official adapter."
-msgstr ""
+#: src/app/ui/streaming/hints.c:12
+msgid "LG Channels button: disconnect. The game keeps running on the PC."
+msgstr "Knop LG Channels: verbinding verbreken. De game blijft op de pc draaien."
 
 #: src/app/ui/streaming/hints.c:13
-msgid "If you have ultra-wide monitor, you may need to change its resolution to fit 16:9 for streaming."
-msgstr ""
+msgid "Rakuten TV button: Windows key."
+msgstr "Knop Rakuten TV: Windows-toets."
+
+#: src/app/ui/streaming/hints.c:14
+msgid "The keyboard opens by itself when a text field on the PC has focus."
+msgstr "Het toetsenbord gaat vanzelf open als je op de pc in een tekstveld staat."
 
 #: src/app/ui/streaming/streaming.controller.c:147
 msgid "Connecting..."

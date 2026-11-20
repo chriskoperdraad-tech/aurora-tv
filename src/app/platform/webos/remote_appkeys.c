@@ -5,6 +5,7 @@
 #include "util/user_event.h"
 
 #include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdbool.h>
@@ -95,6 +96,17 @@ static void handle_event(const struct input_event *ev) {
     }
 }
 
+/* A node that went away (a remote that was unpaired, say) stays "readable" for select, and read()
+ * then fails (ENODEV) without blocking: left in the set, the loop below would spin at full speed
+ * for the rest of the stream. Close it and stop watching it; the other nodes keep working. */
+static void drop_remote(remote_appkeys_t *keys, int index) {
+    commons_log_info("Input", "Remote app keys: a remote node went away (errno %d), no longer reading it", errno);
+    close(keys->fds[index]);
+    keys->nfds--;
+    keys->fds[index] = keys->fds[keys->nfds];
+    keys->fds[keys->nfds] = -1;
+}
+
 static void *remote_appkeys_thread(void *arg) {
     remote_appkeys_t *keys = arg;
     while (keys->running) {
@@ -108,20 +120,30 @@ static void *remote_appkeys_thread(void *arg) {
             }
         }
         if (maxfd < 0) {
-            break;
+            break; /* No remote node left. */
         }
         struct timeval tv = {.tv_sec = 0, .tv_usec = 200000};
         int rc = select(maxfd + 1, &set, NULL, NULL, &tv);
-        if (rc <= 0) {
+        if (rc == 0 || (rc < 0 && errno == EINTR)) {
             continue;
         }
-        for (int i = 0; i < keys->nfds; i++) {
+        if (rc < 0) {
+            /* Would fail again at once: stop instead of spinning. */
+            commons_log_error("Input", "Remote app keys: select failed (errno %d), stopping", errno);
+            break;
+        }
+        /* Backwards: dropping a node moves the last one into its place, which was already read. */
+        for (int i = keys->nfds - 1; i >= 0; i--) {
             if (!FD_ISSET(keys->fds[i], &set)) {
                 continue;
             }
             struct input_event ev;
-            while (read(keys->fds[i], &ev, sizeof(ev)) == (ssize_t) sizeof(ev)) {
+            ssize_t n;
+            while ((n = read(keys->fds[i], &ev, sizeof(ev))) == (ssize_t) sizeof(ev)) {
                 handle_event(&ev);
+            }
+            if (n == 0 || (n < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)) {
+                drop_remote(keys, i);
             }
         }
     }
