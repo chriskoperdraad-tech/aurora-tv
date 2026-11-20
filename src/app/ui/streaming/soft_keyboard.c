@@ -68,60 +68,66 @@ static void kbd_apply_layer_font(soft_kbd_t *kbd);
 #define KBD_ARROW_UP    "^"
 #define KBD_ARROW_RIGHT ">\nRB"
 
-/* --- Alphabetic, own variant: 4 rows on a 24-unit grid, letters 2 units wide, so each row is
- * offset by exactly half a key from the one above (a symmetric, staggered layout). No Esc/F-row
- * and no Up/Down here: those are on the &123 pages. One-line labels only (two-line labels did not
- * fit the 30% keyboard).
- *   q w e r t y u i o p  [Bksp]
- *   [Tab] a s d f g h j k l [Enter]
- *   [Shift] z x c v b n m , . [Shift]
- *   [&123 LT] Ctrl Win Alt [Space Y] [< LB] [RB >]
+/* --- Alphabetic, own variant: 4 rows on a 24-unit grid. Letters are 2 units wide and centred in
+ * every row, with side keys of the same width on both ends; each row starts half a key further in
+ * than the one above. No F-row and no Up/Down here: those are on the &123 pages. One-line labels.
+ *   [Tab]   q w e r t y u i o p   [Bksp]      2 | 20 | 2
+ *   [Esc]    a s d f g h j k l    [Enter]     3 | 18 | 3
+ *   [Shift]   z x c v b n m ,    [Shift]      4 | 16 | 4
+ *   [&123 LT] Ctrl Win [Space Y] . Alt [< LB] [RB >]   8 | 8 | 8
  */
 #define KBD_LEFT_LB  "< LB"
 #define KBD_RIGHT_RB "RB >"
 
 static const char *alpha_map_lower[] = {
-    "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "Bksp",
+    "Tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "Bksp",
     "\n",
-    "Tab", "a", "s", "d", "f", "g", "h", "j", "k", "l", "Enter",
+    "Esc", "a", "s", "d", "f", "g", "h", "j", "k", "l", "Enter",
     "\n",
-    "Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "Shift",
+    "Shift", "z", "x", "c", "v", "b", "n", "m", ",", "Shift",
     "\n",
-    "&123  LT", "Ctrl", "Win", "Alt", "Space  Y", KBD_LEFT_LB, KBD_RIGHT_RB,
+    "&123  LT", "Ctrl", "Win", "Space  Y", ".", "Alt", KBD_LEFT_LB, KBD_RIGHT_RB,
     ""
 };
 
 static const char *alpha_map_upper[] = {
-    "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Bksp",
+    "Tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Bksp",
     "\n",
-    "Tab", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Enter",
+    "Esc", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Enter",
     "\n",
-    "Shift", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "Shift",
+    "Shift", "Z", "X", "C", "V", "B", "N", "M", ",", "Shift",
     "\n",
-    "&123  LT", "Ctrl", "Win", "Alt", "Space  Y", KBD_LEFT_LB, KBD_RIGHT_RB,
+    "&123  LT", "Ctrl", "Win", "Space  Y", ".", "Alt", KBD_LEFT_LB, KBD_RIGHT_RB,
     ""
 };
 
 static const lv_btnmatrix_ctrl_t alpha_ctrl[] = {
-    /* q..p 10x2 + Bksp 4 = 24 */
+    /* Tab 2 + q..p 10x2 + Bksp 2 = 24 */
+    KBD_BTN_W(2),
     KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
-    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(4),
-    /* Tab 3 + a..l 9x2 + Enter 3 = 24 (a sits half a key right of q) */
-    KBD_BTN_W(3), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
-    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(3),
-    /* Shift 4 + z..m 7x2 + , . 2x2 + Shift 2 = 24 (z half a key right of a) */
-    KBD_BTN_W(4), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
     KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
-    /* &123 4 + Ctrl Win Alt 3x2 + Space 8 + < 3 + > 3 = 24 */
-    KBD_BTN_W(4), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(8), KBD_BTN_W(3), KBD_BTN_W(3),
+    KBD_BTN_W(2),
+    /* Esc 3 + a..l 9x2 + Enter 3 = 24 */
+    KBD_BTN_W(3),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    KBD_BTN_W(3),
+    /* Shift 4 + z..m , 8x2 + Shift 4 = 24 */
+    KBD_BTN_W(4),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    KBD_BTN_W(4),
+    /* &123 4 + Ctrl 2 + Win 2 | Space 8 | . 2 + Alt 2 + < 2 + > 2 = 24 */
+    KBD_BTN_W(4), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(8),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
 };
 
-/* 11+11+11+7 = 40 */
+/* 12+11+10+8 = 41 */
 static const short alpha_vks[] = {
-    VK_Q, VK_W, VK_E, VK_R, VK_T, VK_Y, VK_U, VK_I, VK_O, VK_P, VK_BACK,
-    VK_TAB, VK_A, VK_S, VK_D, VK_F, VK_G, VK_H, VK_J, VK_K, VK_L, VK_RETURN,
-    VK_SHIFT, VK_Z, VK_X, VK_C, VK_V, VK_B, VK_N, VK_M, VK_OEM_COMMA, VK_OEM_PERIOD, VK_SHIFT,
-    0, VK_LCONTROL, VK_LWIN, VK_LMENU, VK_SPACE, VK_LEFT, VK_RIGHT,
+    VK_TAB, VK_Q, VK_W, VK_E, VK_R, VK_T, VK_Y, VK_U, VK_I, VK_O, VK_P, VK_BACK,
+    VK_ESCAPE, VK_A, VK_S, VK_D, VK_F, VK_G, VK_H, VK_J, VK_K, VK_L, VK_RETURN,
+    VK_SHIFT, VK_Z, VK_X, VK_C, VK_V, VK_B, VK_N, VK_M, VK_OEM_COMMA, VK_SHIFT,
+    0, VK_LCONTROL, VK_LWIN, VK_SPACE, VK_OEM_PERIOD, VK_LMENU, VK_LEFT, VK_RIGHT,
 };
 
 /* --- Symbols page 1 (top-row digits VK_1..0 — always type numbers; numpad needs host NumLock) --- */
@@ -206,12 +212,12 @@ static const short sym2_vks[] = {
 
 /* Key indices. Own variant: the alphabetic page has its own (4 rows); the symbol pages keep
  * Aurora's (5 rows, Esc/F-row on top, toolbar at 50). */
-#define ALPHA_BTN_SHIFT  22
+#define ALPHA_BTN_SHIFT  23
 #define ALPHA_BTN_SHIFTR 32
 #define ALPHA_BTN_LAYER  33
 #define ALPHA_BTN_CTRL   34
 #define ALPHA_BTN_WIN    35
-#define ALPHA_BTN_ALT    36
+#define ALPHA_BTN_ALT    38
 #define SYM_BTN_PAGE     38
 #define SYM_BTN_LAYER    50
 #define SYM_BTN_CTRL     51
@@ -517,17 +523,18 @@ static bool kbd_is_special_key(kbd_layer_t layer, uint32_t id) {
         return false;
     }
     switch (id) {
-        case 10: /* Bksp */
-        case 11: /* Tab */
-        case 21: /* Enter */
+        case 0:  /* Tab */
+        case 11: /* Bksp */
+        case 12: /* Esc */
+        case 22: /* Enter */
         case ALPHA_BTN_SHIFT:
         case ALPHA_BTN_SHIFTR:
         case ALPHA_BTN_LAYER:
         case ALPHA_BTN_CTRL:
         case ALPHA_BTN_WIN:
         case ALPHA_BTN_ALT:
-        case 38: /* < */
-        case 39: /* > */
+        case 39: /* < */
+        case 40: /* > */
             return true;
         default:
             return false;
