@@ -68,21 +68,26 @@ static void kbd_apply_layer_font(soft_kbd_t *kbd);
 #define KBD_ARROW_UP    "^"
 #define KBD_ARROW_RIGHT ">\nRB"
 
-/* --- Alphabetic, own variant: 4 rows, no Esc/F-row (those are on the &123 pages), so the
- * letters are bigger in the lower keyboard. 12 units per row.
- *   q w e r t y u i o p  Bksp
- *   Tab a s d f g h j k l  Enter
- *   Shift z x c v b n m , .  ^
- *   &123 Ctrl Win Alt  Space  < v >
+/* --- Alphabetic, own variant: 4 rows on a 24-unit grid, letters 2 units wide, so each row is
+ * offset by exactly half a key from the one above (a symmetric, staggered layout). No Esc/F-row
+ * and no Up/Down here: those are on the &123 pages. One-line labels only (two-line labels did not
+ * fit the 30% keyboard).
+ *   q w e r t y u i o p  [Bksp]
+ *   [Tab] a s d f g h j k l [Enter]
+ *   [Shift] z x c v b n m , . [Shift]
+ *   [&123 LT] Ctrl Win Alt [Space Y] [< LB] [RB >]
  */
+#define KBD_LEFT_LB  "< LB"
+#define KBD_RIGHT_RB "RB >"
+
 static const char *alpha_map_lower[] = {
     "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "Bksp",
     "\n",
     "Tab", "a", "s", "d", "f", "g", "h", "j", "k", "l", "Enter",
     "\n",
-    "Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", KBD_ARROW_UP,
+    "Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "Shift",
     "\n",
-    "&123\nLT", "Ctrl", "Win", "Alt", "Space\nY", KBD_ARROW_LEFT, KBD_ARROW_DOWN, KBD_ARROW_RIGHT,
+    "&123  LT", "Ctrl", "Win", "Alt", "Space  Y", KBD_LEFT_LB, KBD_RIGHT_RB,
     ""
 };
 
@@ -91,29 +96,32 @@ static const char *alpha_map_upper[] = {
     "\n",
     "Tab", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Enter",
     "\n",
-    "Shift", "Z", "X", "C", "V", "B", "N", "M", ",", ".", KBD_ARROW_UP,
+    "Shift", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "Shift",
     "\n",
-    "&123\nLT", "Ctrl", "Win", "Alt", "Space\nY", KBD_ARROW_LEFT, KBD_ARROW_DOWN, KBD_ARROW_RIGHT,
+    "&123  LT", "Ctrl", "Win", "Alt", "Space  Y", KBD_LEFT_LB, KBD_RIGHT_RB,
     ""
 };
 
 static const lv_btnmatrix_ctrl_t alpha_ctrl[] = {
-    /* q..p (10) + Bksp(2) */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, KBD_BTN_W(2),
-    /* Tab + a..l (9) + Enter(2) */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, KBD_BTN_W(2),
-    /* Shift(2) + z..m (7) + , . + ^ */
-    KBD_BTN_W(2), 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    /* &123(2) Ctrl Win Alt Space(4) < v > */
-    KBD_BTN_W(2), 1, 1, 1, KBD_BTN_W(4), 1, 1, 1,
+    /* q..p 10x2 + Bksp 4 = 24 */
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(4),
+    /* Tab 3 + a..l 9x2 + Enter 3 = 24 (a sits half a key right of q) */
+    KBD_BTN_W(3), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(3),
+    /* Shift 4 + z..m 7x2 + , . 2x2 + Shift 2 = 24 (z half a key right of a) */
+    KBD_BTN_W(4), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2),
+    /* &123 4 + Ctrl Win Alt 3x2 + Space 8 + < 3 + > 3 = 24 */
+    KBD_BTN_W(4), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(2), KBD_BTN_W(8), KBD_BTN_W(3), KBD_BTN_W(3),
 };
 
-/* 11+11+11+8 = 41 */
+/* 11+11+11+7 = 40 */
 static const short alpha_vks[] = {
     VK_Q, VK_W, VK_E, VK_R, VK_T, VK_Y, VK_U, VK_I, VK_O, VK_P, VK_BACK,
     VK_TAB, VK_A, VK_S, VK_D, VK_F, VK_G, VK_H, VK_J, VK_K, VK_L, VK_RETURN,
-    VK_SHIFT, VK_Z, VK_X, VK_C, VK_V, VK_B, VK_N, VK_M, VK_OEM_COMMA, VK_OEM_PERIOD, VK_UP,
-    0, VK_LCONTROL, VK_LWIN, VK_LMENU, VK_SPACE, VK_LEFT, VK_DOWN, VK_RIGHT,
+    VK_SHIFT, VK_Z, VK_X, VK_C, VK_V, VK_B, VK_N, VK_M, VK_OEM_COMMA, VK_OEM_PERIOD, VK_SHIFT,
+    0, VK_LCONTROL, VK_LWIN, VK_LMENU, VK_SPACE, VK_LEFT, VK_RIGHT,
 };
 
 /* --- Symbols page 1 (top-row digits VK_1..0 — always type numbers; numpad needs host NumLock) --- */
@@ -126,7 +134,7 @@ static const char *sym_map[] = {
     "\n",
     "1/2", "[", "]", "{", "}", "\\", "|", ";", ":", "Home", KBD_ARROW_UP, "End",
     "\n",
-    "abc\nLT", "Ctrl", "Tab", ",", "Space\nY", ".", KBD_ARROW_LEFT, KBD_ARROW_DOWN, KBD_ARROW_RIGHT,
+    "abc  LT", "Ctrl", "Tab", ",", "Space  Y", ".", KBD_LEFT_LB, KBD_ARROW_DOWN, KBD_RIGHT_RB,
     ""
 };
 
@@ -164,7 +172,7 @@ static const char *sym2_map[] = {
     "\n",
     "1/2", "PgUp", "PgDn", "Ins", "Del", "(", ")", "[", "]", "Home", KBD_ARROW_UP, "End",
     "\n",
-    "abc\nLT", "Ctrl", "Tab", ",", "Space\nY", ".", KBD_ARROW_LEFT, KBD_ARROW_DOWN, KBD_ARROW_RIGHT,
+    "abc  LT", "Ctrl", "Tab", ",", "Space  Y", ".", KBD_LEFT_LB, KBD_ARROW_DOWN, KBD_RIGHT_RB,
     ""
 };
 
@@ -199,6 +207,7 @@ static const short sym2_vks[] = {
 /* Key indices. Own variant: the alphabetic page has its own (4 rows); the symbol pages keep
  * Aurora's (5 rows, Esc/F-row on top, toolbar at 50). */
 #define ALPHA_BTN_SHIFT  22
+#define ALPHA_BTN_SHIFTR 32
 #define ALPHA_BTN_LAYER  33
 #define ALPHA_BTN_CTRL   34
 #define ALPHA_BTN_WIN    35
@@ -228,6 +237,7 @@ static void kbd_update_modifier_visuals(soft_kbd_t *kbd) {
     }
     if (kbd->layer == KBD_LAYER_ALPHA) {
         kbd_set_btn_checked(btnm, ALPHA_BTN_SHIFT, kbd->mods.shift);
+        kbd_set_btn_checked(btnm, ALPHA_BTN_SHIFTR, kbd->mods.shift);
         kbd_set_btn_checked(btnm, ALPHA_BTN_WIN, kbd->mods.win);
         kbd_set_btn_checked(btnm, ALPHA_BTN_ALT, kbd->mods.alt);
         kbd_set_btn_checked(btnm, ALPHA_BTN_CTRL, kbd->mods.ctrl);
@@ -511,14 +521,13 @@ static bool kbd_is_special_key(kbd_layer_t layer, uint32_t id) {
         case 11: /* Tab */
         case 21: /* Enter */
         case ALPHA_BTN_SHIFT:
-        case 32: /* ^ */
+        case ALPHA_BTN_SHIFTR:
         case ALPHA_BTN_LAYER:
         case ALPHA_BTN_CTRL:
         case ALPHA_BTN_WIN:
         case ALPHA_BTN_ALT:
         case 38: /* < */
-        case 39: /* v */
-        case 40: /* > */
+        case 39: /* > */
             return true;
         default:
             return false;
@@ -650,6 +659,8 @@ lv_obj_t *soft_keyboard_create(lv_obj_t *parent, session_t *session,
     lv_obj_set_height(btnm, LV_PCT(100));
     lv_obj_set_style_bg_opa(btnm, LV_OPA_TRANSP, 0);
     lv_obj_set_style_border_opa(btnm, LV_OPA_TRANSP, 0);
+    /* Own variant: the theme pads the matrix; without this the keys used about half the panel. */
+    lv_obj_set_style_pad_all(btnm, 0, 0);
     lv_obj_set_style_text_font(btnm, lv_theme_get_font_small(parent), 0);
     kbd_apply_theme(btnm);
     kbd_apply_controls(kbd);
